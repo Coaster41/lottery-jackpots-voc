@@ -14,6 +14,7 @@ from data import cifar10, cifar100
 from utils.common import *
 from importlib import import_module
 
+from sklearn.metrics import average_precision_score, f1_score
 from utils.conv_type import *
 
 import models
@@ -126,11 +127,21 @@ def pop_up(model, rate):
     #logger.info("epoch{} iter{} pop_configuration {}".format(epoch, iter, pop_num))
     return np.array(pop_num)
 
+def compute_mAP(labels,outputs):
+    AP = []
+    for i in range(labels.shape[0]):
+        AP.append(average_precision_score(labels[i],outputs[i]))
+    return np.mean(AP)
+
+def compute_f1(labels, outputs):
+    outputs = outputs > 0.5
+    return f1_score(labels, outputs, average="samples")
+
 def train(model, optimizer, trainLoader, args, epoch):
 
     model.train()
     losses = utils.AverageMeter(':.4e')
-    accurary = utils.AverageMeter(':6.3f')
+    mAP_meter = utils.AverageMeter(':6.3f')
     print_freq = len(trainLoader.dataset) // args.train_batch_size // 10
     #print_freq = 1
     #import pdb;pdb.set_trace()
@@ -152,8 +163,9 @@ def train(model, optimizer, trainLoader, args, epoch):
         if args.freeze_weights:
             pop_config = pop_up(model,rate)
         #print(pop_config)
-        prec1 = utils.accuracy(output, targets)
-        accurary.update(prec1[0], inputs.size(0))
+        mAP = compute_mAP(targets.cpu().detach().numpy(), output.cpu().detach().numpy()), inputs.size(0)
+        # prec1 = utils.accuracy(output, targets)
+        mAP_meter.update(mAP, inputs.size(0))
 
         if batch % print_freq == 0 and batch != 0:
             current_time = time.time()
@@ -161,21 +173,22 @@ def train(model, optimizer, trainLoader, args, epoch):
             logger.info(
                 'Epoch[{}] ({}/{}):\t'
                 'Loss {:.4f}\t'
-                'Accurary {:.2f}%\t\t'
+                'mAP {:.2f}%\t\t'
                 'Time {:.2f}s'.format(
                     epoch, batch * args.train_batch_size, len(trainLoader.dataset),
-                    float(losses.avg), float(accurary.avg), cost_time
+                    float(losses.avg), float(mAP_meter.avg), cost_time
                 )
             )
             start_time = current_time
     logger.info("epoch{} pop_configuration {}".format(epoch, pop_config))
 
-def validate(model, testLoader):
+def validate(model, testLoader, device='cuda:0', loss_func=nn.BCEWithLogitsLoss()):
     global best_acc
     model.eval()
 
-    losses = utils.AverageMeter(':.4e')
-    accurary = utils.AverageMeter(':6.3f')
+    losses = AverageMeter(':.4e')
+    mAP = AverageMeter(':6.3f')
+    f1 = AverageMeter(':.4e')
 
     start_time = time.time()
 
@@ -186,20 +199,23 @@ def validate(model, testLoader):
             loss = loss_func(outputs, targets)
 
             losses.update(loss.item(), inputs.size(0))
-            predicted = utils.accuracy(outputs, targets)
-            accurary.update(predicted[0], inputs.size(0))
+            labels_cpu = targets.cpu().detach().numpy()
+            outputs_cpu = outputs.cpu().detach().numpy()
+            mAP.update(compute_mAP(labels_cpu, outputs_cpu), inputs.size(0))
+            f1.update(compute_f1(labels_cpu, outputs_cpu), inputs.size(0))
 
         current_time = time.time()
-        logger.info(
-            'Test Loss {:.4f}\tAccurary {:.2f}%\t\tTime {:.2f}s\n'
-            .format(float(losses.avg), float(accurary.avg), (current_time - start_time))
+        print(
+            'Test Loss {:.4f}\tmAP {:.2f}%\tf1 score {:.2f}\tTime {:.2f}s\n'
+            .format(float(losses.avg), float(mAP.avg*100), float(f1.avg), (current_time - start_time))
         )
-    return accurary.avg
+    return mAP.avg.item()
 
 def generate_pr_cfg(model):
     cfg_len = {
         'vgg': 17,
         'resnet32': 32,
+        'resnet34': 34
     }
 
     pr_cfg = []
