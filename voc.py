@@ -165,6 +165,7 @@ def train(model, optimizer, trainLoader, args, epoch):
         #print(pop_config)
         mAP = compute_mAP(targets.cpu().detach().numpy(), output.cpu().detach().numpy()), inputs.size(0)
         # prec1 = utils.accuracy(output, targets)
+        print(mAP)
         mAP_meter.update(mAP, inputs.size(0))
 
         if batch % print_freq == 0 and batch != 0:
