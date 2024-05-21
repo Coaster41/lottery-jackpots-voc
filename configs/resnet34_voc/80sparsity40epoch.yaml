@@ -1,0 +1,28 @@
+# Architecture
+arch: resnet32_voc
+pretrained_model: ./pre-train/resnet34_voc.pt
+
+# ===== Dataset ===== #
+data_path: ../datasets/Cifar
+data_set: cifar10
+job_dir: ./experiment/resnet34_voc/90sparsity160epoch
+
+# ===== Learning Rate Policy ======== #
+optimizer: adam
+lr: 0.001
+
+# ===== Network training config ===== #
+num_epochs: 40
+weight_decay: 0.0001
+momentum: 0.9
+train_batch_size: 256
+eval_batch_size: 256
+prune_rate: 0.8 # Override
+
+# ===== Sparsity ===== #
+conv_type: PretrainConv
+freeze_weights: True
+
+
+# ===== Hardware setup ===== #
+workers: 20
