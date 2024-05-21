@@ -1,11 +1,11 @@
 # Architecture
 arch: resnet32_voc
-pretrained_model: ./pre-train/resnet32_voc.pt
+pretrained_model: ./pre-train/resnet34_voc.pt
 
 # ===== Dataset ===== #
 data_path: ../datasets/Cifar
 data_set: cifar10
-job_dir: ./experiment/resnet32_voc/90sparsity160epoch
+job_dir: ./experiment/resnet34_voc/90sparsity160epoch
 
 # ===== Learning Rate Policy ======== #
 optimizer: sgd
