@@ -83,7 +83,7 @@ loss_func = nn.BCEWithLogitsLoss()
 print('==> Loading Data..')
 class Data:
     def __init__(self, args):
-        self.trainLoader = VOCnew(root=r'/tmp/public_dataset/pytorch/pascalVOC-data', image_set='train', download=False,
+        train_dataset = VOCnew(root=r'/tmp/public_dataset/pytorch/pascalVOC-data', image_set='train', download=False,
                         transform=transforms.Compose([
                             transforms.Resize(330),
                             transforms.Pad(30),
@@ -93,13 +93,15 @@ class Data:
                             transforms.Normalize((0.4914, 0.4822, 0.4465), (0.2023, 0.1994, 0.2010)),
                         ]))
 
-        self.testLoader = VOCnew(root=r'/tmp/public_dataset/pytorch/pascalVOC-data', image_set='val', download=False,
+        test_dataset = VOCnew(root=r'/tmp/public_dataset/pytorch/pascalVOC-data', image_set='val', download=False,
                         transform=transforms.Compose([
                             transforms.Resize(330), 
                             transforms.CenterCrop(300),
                             transforms.ToTensor(),
                             transforms.Normalize((0.4914, 0.4822, 0.4465), (0.2023, 0.1994, 0.2010)),
                         ]))
+        self.trainLoader = torch.utils.data.DataLoader(train_dataset, batch_size=256, shuffle=True, num_workers=4)
+        self.testLoader = torch.utils.data.DataLoader(test_dataset, batch_size=256, shuffle=False, num_workers=4)
 loader = Data()
 
 # train_loader = torch.utils.data.DataLoader(train_dataset, batch_size=32, shuffle=True)
