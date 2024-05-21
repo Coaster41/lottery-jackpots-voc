@@ -131,7 +131,6 @@ def compute_mAP(labels,outputs):
     AP = []
     for i in range(labels.shape[0]):
         AP.append(average_precision_score(labels[i],outputs[i]))
-    print(np.array(AP).shape, np.mean(np.array(AP)))
     return np.mean(AP)
 
 def compute_f1(labels, outputs):
@@ -164,9 +163,8 @@ def train(model, optimizer, trainLoader, args, epoch):
         if args.freeze_weights:
             pop_config = pop_up(model,rate)
         #print(pop_config)
-        mAP = compute_mAP(targets.cpu().detach().numpy(), output.cpu().detach().numpy()), inputs.size(0)
+        mAP = compute_mAP(targets.cpu().detach().numpy(), output.cpu().detach().numpy())
         # prec1 = utils.accuracy(output, targets)
-        print(mAP)
         mAP_meter.update(mAP, inputs.size(0))
 
         if batch % print_freq == 0 and batch != 0:
