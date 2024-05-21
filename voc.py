@@ -302,16 +302,16 @@ def resume(args, model, optimizer):
 
 def get_model(args,logger):
     pr_cfg = []
-
+    print(device)
     print("=> Creating model '{}'".format(args.arch))
-    model = resnet_voc.to(device)
+    model = resnet_voc().to(device)
     ckpt = torch.load(args.pretrained_model, map_location=device)
     #import pdb;pdb.set_trace()
     model.load_state_dict(ckpt, strict=False)
     
     #applying sparsity to the network
     pr_cfg = generate_pr_cfg(model)
-    model = resnet_voc.to(device)
+    model = resnet_voc().to(device)
     set_model_prune_rate(model, pr_cfg, logger)
     
     if args.freeze_weights:
