@@ -299,19 +299,29 @@ def resume(args, model, optimizer):
     else:
         print(f"=> No checkpoint found at '{args.job_dir}' '/checkpoint/")
 
+class VocModel(nn.Module):
+    def __init__(self, num_classes, weights=None):
+        super().__init__()
+        # Use a pretrained model
+        self.network = resnet_voc.resnet34(weights=weights, lottery=True)
+        # Replace last layer
+        self.network.fc = nn.Linear(self.network.fc.in_features, num_classes)
+
+    def forward(self, xb):
+        return self.network(xb)
 
 def get_model(args,logger):
     pr_cfg = []
     print(device)
     print("=> Creating model '{}'".format(args.arch))
-    model = resnet_voc().to(device)
+    model = VocModel(20).to(device)
     ckpt = torch.load(args.pretrained_model, map_location=device)
     #import pdb;pdb.set_trace()
     model.load_state_dict(ckpt, strict=False)
     
     #applying sparsity to the network
     pr_cfg = generate_pr_cfg(model)
-    model = resnet_voc().to(device)
+    model = VocModel(20).to(device)
     set_model_prune_rate(model, pr_cfg, logger)
     
     if args.freeze_weights:
