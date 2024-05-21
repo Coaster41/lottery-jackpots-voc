@@ -84,7 +84,7 @@ loss_func = nn.BCEWithLogitsLoss()
 print('==> Loading Data..')
 class Data:
     def __init__(self):
-        train_dataset = VOCnew(root=r'/tmp/public_dataset/pytorch/pascalVOC-data', image_set='train', download=False,
+        train_dataset = VOCnew(root=r'/tmp/public_dataset/pytorch/pascalVOC-data', image_set='train', download=True,
                         transform=transforms.Compose([
                             transforms.Resize(330),
                             transforms.Pad(30),
@@ -205,7 +205,7 @@ def validate(model, testLoader, device='cuda:0', loss_func=nn.BCEWithLogitsLoss(
             f1.update(compute_f1(labels_cpu, outputs_cpu), inputs.size(0))
 
         current_time = time.time()
-        print(
+        logger.info(
             'Test Loss {:.4f}\tmAP {:.2f}%\tf1 score {:.2f}\tTime {:.2f}s\n'
             .format(float(losses.avg), float(mAP.avg*100), float(f1.avg), (current_time - start_time))
         )
