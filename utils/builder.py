@@ -3,7 +3,7 @@ import math
 import torch
 import torch.nn as nn
 
-from utils.options import args
+# from utils.options import args
 import utils.conv_type
 
 
@@ -111,11 +111,11 @@ class Builder(object):
 
 def get_builder():
 
-    print("==> Conv Type: {}".format(args.conv_type))
-    print("==> BN Type: {}".format(args.bn_type))
+    # print("==> Conv Type: {}".format(args.conv_type))
+    # print("==> BN Type: {}".format(args.bn_type))
 
-    conv_layer = getattr(utils.conv_type, args.conv_type)
-    bn_layer = getattr(utils.conv_type, args.bn_type)
+    conv_layer = utils.conv_type.PretrainConv
+    bn_layer = utils.conv_type.LearnedBatchNorm
 
     builder = Builder(conv_layer=conv_layer, bn_layer=bn_layer)
 

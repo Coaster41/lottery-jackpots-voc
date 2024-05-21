@@ -1,6 +1,6 @@
 
 
-from multiprocessing import popen_spawn_posix
+# from multiprocessing import popen_spawn_posix
 from torch.nn import init
 import torch
 import torch.autograd as autograd
@@ -9,7 +9,7 @@ import torch.nn.functional as F
 
 import math
 
-from utils.options import args as parser_args
+# from utils.options import args as parser_args
 import numpy as np
 import pdb
 LearnedBatchNorm = nn.BatchNorm2d
@@ -35,8 +35,8 @@ class GetMask(autograd.Function):
 class PretrainConv(nn.Conv2d):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.mask = nn.Parameter(torch.ones(self.weight.shape))
-        self.b_mask = torch.ones(self.weight.shape, requires_grad=False)
+        self.mask = nn.Parameter(torch.ones(self.weight.shape, device='cuda:0'))
+        self.b_mask = torch.ones(self.weight.shape, requires_grad=False, device='cuda:0')
 
     def forward(self, x):
         mask = GetMask.apply(self.mask, self.b_mask)
