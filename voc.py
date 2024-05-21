@@ -82,7 +82,7 @@ loss_func = nn.BCEWithLogitsLoss()
 # Data
 print('==> Loading Data..')
 class Data:
-    def __init__(self, args):
+    def __init__(self):
         train_dataset = VOCnew(root=r'/tmp/public_dataset/pytorch/pascalVOC-data', image_set='train', download=False,
                         transform=transforms.Compose([
                             transforms.Resize(330),
