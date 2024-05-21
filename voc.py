@@ -131,6 +131,7 @@ def compute_mAP(labels,outputs):
     AP = []
     for i in range(labels.shape[0]):
         AP.append(average_precision_score(labels[i],outputs[i]))
+    print(np.array(AP).shape, np.mean(np.array(AP)))
     return np.mean(AP)
 
 def compute_f1(labels, outputs):
